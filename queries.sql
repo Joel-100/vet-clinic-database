@@ -45,7 +45,8 @@ SELECT * from animals;
   UPDATE animals
   SET species = 'pokemon'
   WHERE name NOT LIKE '%mon';
-
+  
+  SELECT * from animals
   -- commit transaction
   COMMIT;
 
@@ -53,6 +54,8 @@ SELECT * from animals;
   SELECT * from animals
 
 -- Delete records
+BEGIN;
+
 DELETE from animals;
 
 -- verify all records are deleted
@@ -74,6 +77,10 @@ WHERE date_of_birth > '01-01-2022';
 
 -- create a savepoint for the transaction
 SAVEPOINT SP1;
+
+UPDATE animals 
+SET weight_kg = weight_kg * -1;
+ROLLBACK TO SP1;
 
 -- update all animals' weights that are negative multiplied by -1
 UPDATE animals
