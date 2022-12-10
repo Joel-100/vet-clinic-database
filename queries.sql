@@ -13,3 +13,144 @@ SELECT * FROM animals WHERE neutered IS TRUE;
 SELECT * FROM animals WHERE name != 'Gabumon';
 
 SELECT * FROM animals WHERE weight_kg BETWEEN 10.4 AND 17.3;
+
+
+/* update the animals table by setting the species column to unspecified */
+-- Begin Transaction
+BEGIN; 
+
+-- Update species column to 'unspecified'
+UPDATE animals
+SET species = 'unspecified';
+
+-- verify that change was made
+SELECT * from animals;
+
+-- roll back and verify that species column went back to state
+ROLLBACK;
+
+-- verify changes
+SELECT * from animals; 
+
+-- Update species column based on a condition
+-- Transaction begins
+  BEGIN;
+
+  -- update species column for animals with names ending in mon
+  UPDATE animals
+  SET species = 'digimon'
+  WHERE name LIKE '%mon';
+
+  -- update species column for animals with names not ending in mon
+  UPDATE animals
+  SET species = 'pokemon'
+  WHERE name NOT LIKE '%mon';
+  
+  SELECT * from animals
+  -- commit transaction
+  COMMIT;
+
+  -- verify changes
+  SELECT * from animals
+
+-- Delete records
+BEGIN;
+
+DELETE from animals;
+
+-- verify all records are deleted
+SELECT * from animals;
+
+-- rollback changes
+ROLLBACK;
+
+-- verify all records still exist
+SELECT * from animals;
+
+-- queries
+-- begin transaction
+BEGIN;
+
+-- delete all animals born after Jan 1st 2022
+DELETE from animal
+WHERE date_of_birth > '01-01-2022';
+
+-- create a savepoint for the transaction
+SAVEPOINT SP1;
+
+UPDATE animals 
+SET weight_kg = weight_kg * -1;
+ROLLBACK TO SP1;
+
+-- update all animals' weights that are negative multiplied by -1
+UPDATE animals
+SET weight_kg = weight_kg * -1
+WHERE weight_kg < 0;
+
+-- commit the transactions
+COMMIT;
+
+-- aggregates
+
+-- How many animals are there?
+SELECT COUNT(*) from animals;
+
+-- How many animals have never tried to escape?
+SELECT COUNT(*) from animals
+WHERE escape_attempts = 0;
+
+-- What is the average weight of animals?
+SELECT AVG(weight_kg) from animals;
+
+-- Who escapes the most, neutered or not neutered animals?
+SELECT neutered, COUNT(escape_attempts) FROM animals GROUP BY neutered;
+
+-- What is the minimum and maximum weight of each type of animal?
+SELECT species, MIN(weight_kg), MAX(weight_kg) FROM animals GROUP BY species;
+
+-- What is the average number of escape attempts per animal type of those born between 1990 and 2000?
+SELECT species, AVG(escape_attempts) FROM animals
+WHERE date_of_birth BETWEEN '01-01-1990' AND '01-01-2000'
+GROUP BY species;
+
+-- What animals belong to Melody Pond?
+SELECT name, full_name from animals
+JOIN owners
+ON animals.owners_id = owners.id
+WHERE owners.full_name = 'Melody Pond';
+
+-- List of all animals that are pokemon
+SELECT animals.name AS Animal_Name, species.name AS Species_Name from animals
+JOIN species
+ON animals.species_id = species.id
+WHERE species.name = 'Pokemon';
+
+-- List all owners and their animals
+SELECT full_name AS owner_name, name AS animal_name from owners
+FULL JOIN animals
+ON owners.id = animals.owners_id;
+
+-- How many animals are there per species?
+SELECT COUNT(animals) AS Num_of_animals, species.name AS species_name from animals
+JOIN species
+ON animals.species_id = species.id
+GROUP BY species.name;
+
+-- List all Digimon owned by Jennifer Orwell
+SELECT animals.name AS animal_name, full_name AS owner_name from animals
+JOIN owners ON animals.owners_id = owners.id
+JOIN species ON animals.species_id = species.id
+WHERE owners.full_name = 'Jennifer Orwell' AND species.name = 'Digimon'
+
+--  List all animals owned by Dean Winchester that haven't tried to escape.
+SELECT animals.name AS animal_name, full_name AS owners_name from animals
+JOIN owners ON animals.owners_id = owners.id
+WHERE owners.full_name = 'Dean Winchester' AND escape_attempts = 0;
+
+-- Who owns the most animals?
+SELECT full_name AS owners_name, COUNT(species_id) AS num_of_animals from animals
+FULL JOIN owners ON animals.owners_id = owners.id
+GROUP BY owners.full_name
+ORDER BY COUNT(name) DESC LIMIT 1;
+
+
