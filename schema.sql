@@ -1,6 +1,6 @@
 /* Database schema to keep the structure of entire database. */
 
--- Create animals table
+-- animals table
 CREATE TABLE animals (
     id int GENERATED ALWAYS AS IDENTITY,
     name varchar(250),
@@ -10,3 +10,7 @@ CREATE TABLE animals (
 	weight_kg decimal,
 	PRIMARY KEY(id)
 );
+
+-- species column
+ALTER TABLE animals
+ADD COLUMN species varchar(250);
